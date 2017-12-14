@@ -81,6 +81,7 @@ cc_library(
     deps = [
         "@boringssl//:crypto",
         "@jsoncpp//:lib_json",
+        "@nginx//:core",
     ],
     copts = JSONCPP_COPTS_FLAGS + [ BSSL_INCLUDE_COPT ],
 )

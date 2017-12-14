@@ -29,7 +29,8 @@
 
 #include <string>
 
-#include "openssl/base64.h"
+#include "src/core/ngx_core.h"
+#include "src/core/ngx_string.h"
 
 namespace google {
 namespace cloud {
@@ -87,13 +88,17 @@ bool url_safe_base64_decode(
     uint8_t *decoded,
     size_t *decoded_len) {
   std::string canonicalized_b64_str = canonicalize_b64_string(b64_str);
-  int ret = EVP_DecodeBase64(
-      decoded,
-      decoded_len,
-      max_len,
-      (const uint8_t *)canonicalized_b64_str.data(),
-      canonicalized_b64_str.length());
-  return ret == 1;
+  ngx_str_t src = {
+    canonicalized_b64_str.length(),
+    (uint8_t *)canonicalized_b64_str.data()
+  };
+  ngx_str_t dst = {
+    *decoded_len,
+    decoded
+  };
+  int ret = ngx_decode_base64url(&dst, &src);
+  *decoded_len = dst.len;
+  return ret == NGX_OK;
 }
 
 std::unique_ptr<uint8_t[]> url_safe_base64_decode(
